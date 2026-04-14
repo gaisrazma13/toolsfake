@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Fake Tools By RaXzz</title>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    text-align:center;
+    color:white;
+}
+
+/* 🎥 VIDEO BACKGROUND */
+.bg-video {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:-2;
+}
+
+/* BLUR OVERLAY */
+.blur {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.4);
+    z-index:-1;
+}
+
+/* CONTENT */
+.page { display:none; }
+.active { display:block; }
+
+/* NAV */
+.nav button {
+    padding:8px;
+    margin:5px;
+    background:#0aa3e3;
+    color:white;
+    border:none;
+    border-radius:5px;
+}
+
+/* PHONE */
+.phone {
+    width:320px;
+    margin:auto;
+    border-radius:20px;
+    overflow:hidden;
+    background:white;
+    color:black;
+}
+
+/* STATUS BAR */
+.status-bar {
+    background:#0b2a2f;
+    color:white;
+    padding:6px 10px;
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+}
+
+.left,.right {
+    display:flex;
+    gap:6px;
+    align-items:center;
+}
+
+/* SIGNAL */
+.signal span {
+    display:inline-block;
+    width:2px;
+    background:white;
+}
+.signal span:nth-child(1){height:4px;opacity:.4;}
+.signal span:nth-child(2){height:6px;opacity:.6;}
+.signal span:nth-child(3){height:8px;opacity:.8;}
+.signal span:nth-child(4){height:10px;}
+
+/* WIFI */
+.wifi {
+    width:12px;
+    height:10px;
+    border:2px solid white;
+    border-top:none;
+    border-radius:0 0 10px 10px;
+}
+
+/* BATTERY */
+.battery {
+    position:relative;
+    width:32px;
+    height:14px;
+    border:2px solid white;
+    font-size:9px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+.battery::after {
+    content:'';
+    position:absolute;
+    right:-5px;
+    width:3px;
+    height:6px;
+    background:white;
+}
+.battery-level {
+    position:absolute;
+    left:0;
+    top:0;
+    height:100%;
+    background:white;
+}
+.battery-text {
+    z-index:1;
+    color:black;
+    font-weight:bold;
+}
+
+/* HEADER */
+.header {
+    background:#0aa3e3;
+    color:white;
+    padding:15px;
+    text-align:left;
+}
+.saldo {
+    font-size:26px;
+    font-weight:bold;
+}
+
+/* INPUT */
+input, button {
+    padding:8px;
+    margin:4px;
+}
+
+/* WA */
+#waPage {
+    color:#eee;
+}
+canvas {
+    border:1px solid #444;
+    margin-top:10px;
+    max-width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🎥 VIDEO -->
+<video class="bg-video" autoplay muted loop id="bgvid">
+    <source src="https://files.catbox.moe/5yfazz.mp4" type="video/mp4">
+</video>
+
+<div class="blur"></div>
+
+<h2>Fake Tools By RaxZz</h2>
+
+<div class="nav">
+<button onclick="showPage('danaPage')"> SALDO</button>
+<button onclick="showPage('waPage')"> WA</button>
+</div>
+
+<!-- ================= DANA ================= -->
+<div id="danaPage" class="page active">
+
+<input id="nominal" placeholder="Nominal"><br>
+<input id="jam" placeholder="Jam"><br>
+<input id="batteryInput" placeholder="Battery"><br>
+<input id="speed" placeholder="Speed"><br>
+
+<button onclick="generateDana()">Generate</button>
+<button onclick="downloadDana()">Download</button>
+
+<br><br>
+
+<div id="capture" class="phone">
+
+<div class="status-bar">
+    <div class="left">
+        <span id="jamText">16:49</span>
+        <span id="speedText">2.73</span>K/s
+        <div class="wifi"></div>
+    </div>
+
+    <div class="right">
+        <span>Vo LTE</span>
+        <span>4G</span>
+
+        <div class="signal">
+            <span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="battery">
+            <div id="batteryLevel" class="battery-level" style="width:50%"></div>
+            <span id="batteryText" class="battery-text">50</span>
+        </div>
+    </div>
+</div>
+
+<div class="header">
+Saldo
+<div id="saldoText" class="saldo">Rp 0</div>
+</div>
+
+</div>
+</div>
+
+<!-- ================= WA ================= -->
+<div id="waPage" class="page">
+
+<input type="file" id="ppInput"><br>
+<input id="nama" placeholder="Nama"><br>
+<input id="bio" placeholder="Bio"><br>
+<input id="nomor" placeholder="Nomor"><br>
+
+<button onclick="generateWA()">Generate</button>
+<button onclick="downloadWA()">Download</button>
+
+<canvas id="canvas"></canvas>
+
+</div>
+
+<script>
+// NAV
+function showPage(id){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+}
+
+// MUSIC UNMUTE (biar ada suara)
+document.body.addEventListener("click",()=>{
+ document.getElementById("bgvid").muted=false;
+});
+
+// DANA
+function formatRupiah(a){
+ let n=a.replace(/[^0-9]/g,'');
+ return "Rp "+Number(n||0).toLocaleString("id-ID");
+}
+
+function generateDana(){
+ saldoText.innerText=formatRupiah(nominal.value);
+ if(jam.value) jamText.innerText=jam.value;
+ if(speed.value) speedText.innerText=speed.value;
+
+ if(batteryInput.value){
+   let v=Math.max(1,Math.min(100,batteryInput.value));
+   batteryLevel.style.width=v+"%";
+   batteryText.innerText=v;
+   batteryLevel.style.background=v<=20?"red":"white";
+ }
+}
+
+function downloadDana(){
+ html2canvas(capture,{scale:2}).then(c=>{
+   let a=document.createElement('a');
+   a.download="fake-dana.png";
+   a.href=c.toDataURL();
+   a.click();
+ });
+}
+
+// WA
+const templateUrl="https://uploader.zenzxz.dpdns.org/uploads/1757090672815.jpeg";
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+let img=new Image();
+img.crossOrigin="anonymous";
+img.src=templateUrl;
+
+function generateWA(){
+ let file=ppInput.files[0];
+ if(!file){alert("upload foto dulu");return;}
+
+ let r=new FileReader();
+ r.onload=e=>{
+  let p=new Image();
+  p.onload=()=>{
+    canvas.width=img.width;
+    canvas.height=img.height;
+    ctx.drawImage(img,0,0);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(300,170,80,0,Math.PI*2);
+    ctx.clip();
+    ctx.drawImage(p,220,90,160,160);
+    ctx.restore();
+
+    ctx.fillStyle="#aaa";
+    ctx.font="16px Arial";
+    ctx.fillText(nama.value,75,370);
+    ctx.fillText(bio.value,75,445);
+    ctx.fillText(nomor.value,75,530);
+  };
+  p.src=e.target.result;
+ };
+ r.readAsDataURL(file);
+}
+
+function downloadWA(){
+ let a=document.createElement("a");
+ a.download="fake-wa.jpg";
+ a.href=canvas.toDataURL();
+ a.click();
+}
+</script>
+
+</body>
+</html>
